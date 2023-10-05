@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update>
+    <sys_choice action="INSERT_OR_UPDATE" field="reason_of_travel" table="x_snc_travel_req_0_travel_request" version="3">
+        <sys_choice_set action="INSERT_OR_UPDATE">
+            <element>reason_of_travel</element>
+            <name>x_snc_travel_req_0_travel_request</name>
+            <sys_class_name>sys_choice_set</sys_class_name>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2023-10-05 00:20:24</sys_created_on>
+            <sys_id>c2551e7785e131107f447a2ba61bd991</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>reason_of_travel</sys_name>
+            <sys_package display_value="Travel Request" source="x_snc_travel_req_0">3aa1927385e131107f447a2ba61bd952</sys_package>
+            <sys_policy/>
+            <sys_scope display_value="Travel Request">3aa1927385e131107f447a2ba61bd952</sys_scope>
+            <sys_update_name>sys_choice_x_snc_travel_req_0_travel_request_reason_of_travel</sys_update_name>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2023-10-05 00:20:24</sys_updated_on>
+        </sys_choice_set>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>reason_of_travel</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>Customer meeting</label>
+            <language>en</language>
+            <name>x_snc_travel_req_0_travel_request</name>
+            <sequence>0</sequence>
+            <synonyms/>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2023-10-05 00:20:24</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>8e551e7785e131107f447a2ba61bd990</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2023-10-05 00:20:24</sys_updated_on>
+            <value>Customer meeting</value>
+        </sys_choice>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>reason_of_travel</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>Internal meeting</label>
+            <language>en</language>
+            <name>x_snc_travel_req_0_travel_request</name>
+            <sequence>1</sequence>
+            <synonyms/>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2023-10-05 00:20:25</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>c6551e7785e131107f447a2ba61bd996</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2023-10-05 00:20:25</sys_updated_on>
+            <value>Internal meeting</value>
+        </sys_choice>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>reason_of_travel</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>Training</label>
+            <language>en</language>
+            <name>x_snc_travel_req_0_travel_request</name>
+            <sequence>2</sequence>
+            <synonyms/>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2023-10-05 00:20:25</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>82551e7785e131107f447a2ba61bd99b</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2023-10-05 00:20:25</sys_updated_on>
+            <value>Training</value>
+        </sys_choice>
+    </sys_choice>
+</record_update>
