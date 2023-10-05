@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element db_object_id="637252b385e131107f447a2ba61bd9b8" extends="task" label="Travel Request" max_length="40" name="x_snc_travel_req_0_travel_request" type="collection">
+        <element label="Departure date" max_length="255" name="departure_date" type="glide_date"/>
+        <element formula="TIMEDIFF(return_date, departure_date)" label="Number of days" max_length="255" name="number_of_days" type="integer" virtual="true" virtual_type="formula"/>
+        <element choice="1" label="Reason of travel" max_length="40" name="reason_of_travel" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Customer meeting" sequence="0" value="Customer meeting"/>
+                <element inactive_on_update="false" label="Internal meeting" sequence="1" value="Internal meeting"/>
+                <element inactive_on_update="false" label="Training" sequence="2" value="Training"/>
+            </choice>
+        </element>
+        <element label="Return date" max_length="255" name="return_date" type="glide_date"/>
+        <element label="Travel from" max_length="32" name="travel_from" reference="x_snc_travel_req_0_airport" type="reference"/>
+        <element label="Travel to" max_length="32" name="travel_to" reference="x_snc_travel_req_0_airport" type="reference"/>
+    </element>
+</database>

@@ -6,7 +6,6 @@
             <sys_class_name>sys_choice_set</sys_class_name>
             <sys_created_by>admin</sys_created_by>
             <sys_created_on>2023-10-05 00:20:24</sys_created_on>
-            <sys_id>c2551e7785e131107f447a2ba61bd991</sys_id>
             <sys_mod_count>0</sys_mod_count>
             <sys_name>reason_of_travel</sys_name>
             <sys_package display_value="Travel Request" source="x_snc_travel_req_0">3aa1927385e131107f447a2ba61bd952</sys_package>
@@ -30,7 +29,6 @@
             <sys_created_on>2023-10-05 00:20:24</sys_created_on>
             <sys_domain>global</sys_domain>
             <sys_domain_path>/</sys_domain_path>
-            <sys_id>8e551e7785e131107f447a2ba61bd990</sys_id>
             <sys_mod_count>0</sys_mod_count>
             <sys_updated_by>admin</sys_updated_by>
             <sys_updated_on>2023-10-05 00:20:24</sys_updated_on>
@@ -50,7 +48,6 @@
             <sys_created_on>2023-10-05 00:20:25</sys_created_on>
             <sys_domain>global</sys_domain>
             <sys_domain_path>/</sys_domain_path>
-            <sys_id>c6551e7785e131107f447a2ba61bd996</sys_id>
             <sys_mod_count>0</sys_mod_count>
             <sys_updated_by>admin</sys_updated_by>
             <sys_updated_on>2023-10-05 00:20:25</sys_updated_on>
@@ -70,7 +67,6 @@
             <sys_created_on>2023-10-05 00:20:25</sys_created_on>
             <sys_domain>global</sys_domain>
             <sys_domain_path>/</sys_domain_path>
-            <sys_id>82551e7785e131107f447a2ba61bd99b</sys_id>
             <sys_mod_count>0</sys_mod_count>
             <sys_updated_by>admin</sys_updated_by>
             <sys_updated_on>2023-10-05 00:20:25</sys_updated_on>

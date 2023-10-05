@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element db_object_id="c74612f785e131107f447a2ba61bd940" label="Airport" max_length="40" name="x_snc_travel_req_0_airport" type="collection">
+        <element attributes="edge_encryption_enabled=true" label="City" max_length="40" name="city" type="string"/>
+        <element attributes="edge_encryption_enabled=true" label="Code" max_length="40" name="code" type="string"/>
+        <element attributes="edge_encryption_enabled=true" label="Country" max_length="40" name="country" type="string"/>
+        <element attributes="edge_encryption_enabled=true" label="Icao" max_length="40" name="icao" type="string"/>
+        <element attributes="edge_encryption_enabled=true" label="Lat" max_length="40" name="lat" type="string"/>
+        <element attributes="edge_encryption_enabled=true" label="Lon" max_length="40" name="lon" type="string"/>
+        <element attributes="edge_encryption_enabled=true" display="true" label="Name" max_length="43" name="name" type="string"/>
+        <element attributes="edge_encryption_enabled=true" label="State" max_length="40" name="state" type="string"/>
+    </element>
+</database>

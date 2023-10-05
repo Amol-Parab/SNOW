@@ -47,14 +47,13 @@
         <sys_class_name>sys_dictionary</sys_class_name>
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2023-10-05 00:07:58</sys_created_on>
-        <sys_id>e77252b385e131107f447a2ba61bd9bd</sys_id>
         <sys_name>x_snc_travel_req_0_travel_request</sys_name>
         <sys_package display_value="Travel Request" source="x_snc_travel_req_0">3aa1927385e131107f447a2ba61bd952</sys_package>
         <sys_policy/>
         <sys_scope display_value="Travel Request">3aa1927385e131107f447a2ba61bd952</sys_scope>
         <sys_update_name>sys_dictionary_x_snc_travel_req_0_travel_request_null</sys_update_name>
-        <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2023-10-05 00:07:58</sys_updated_on>
+        <sys_updated_by>system</sys_updated_by>
+        <sys_updated_on>2023-10-05 10:50:59</sys_updated_on>
         <table_reference>false</table_reference>
         <text_index>false</text_index>
         <unique>false</unique>
