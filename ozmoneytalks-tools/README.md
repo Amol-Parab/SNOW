@@ -1,9 +1,10 @@
 # OzMoneyTalks Tools (WordPress plugin)
 
-Four tools for Indian migrants in Australia, each added to a page with a shortcode:
+Five tools for Indian migrants in Australia, each added to a page with a shortcode:
 
 | Tool | Shortcode | What it does |
 |---|---|---|
+| #2 Send money to India | `[oz_remittance]` | Ranks transfer providers by how many rupees the recipient gets, using the live mid-market rate and your provider fees and margins. Readers can add a quote they've been given. Shows the yearly cost of picking the wrong provider. |
 | #1 Settling-in checklist | `[oz_settling_checklist]` | Checklist for each visa situation (student, skilled, partner, visiting parent). Ticks are saved in the browser, and readers can have the list emailed to them. |
 | #4 Rent move-in cost | `[oz_rent_calculator]` | Upfront cash needed to move in (bond, rent in advance, furniture, setup), with state defaults and a check against the 30% rent-to-income rule. |
 | #3 India vs Australia savings | `[oz_savings_compare]` | Australian savings account vs NRE FD vs NRO FD after Indian tax, Australian tax (depends on visa), the treaty offset, transfer costs and rupee movement. |
@@ -25,14 +26,19 @@ Every tool ends with an email signup, and all signups go into one list. You can 
 6. **Scheduled jobs:** WP-Cron only runs when someone visits the site. For reliable 8am alerts, ask your host to add a real cron job that calls `https://yoursite/wp-cron.php` every 15 minutes.
 7. Your host must allow outgoing HTTPS requests to `api.frankfurter.dev`. The settings page shows whether the rate is loading.
 
-## Connecting the remittance comparator (#2)
+## Remittance providers — check at least monthly
 
-That tool was built in a separate chat and isn't in this repo. To connect it:
+The provider list is edited under **Settings → OzMoneyTalks Tools → Money transfer providers**, with no code changes needed.
 
-- Put its page URL in **Settings → Remittance comparator**. The checklist, rate alert, weekly email and alert emails will then link to it.
-- Add `[oz_signup source="remittance" title="Get the weekly rate update"]` under it so its signups join the same list.
-- It can use this plugin's cached rate instead of calling Frankfurter from every visitor's browser:
-  `GET /wp-json/oz-tools/v1/rate` → `{ "rate": 57.83, "date": "2026-09-25", "history": [["2026-08-17", 57.78], …], "stale": false }`
+For each provider, get a live quote for sending A$1,000 to India and enter:
+- **Fixed fee (A$)** and/or **Fee %** — what they charge on top.
+- **FX margin %** — how far their rate is below the mid-market rate. Example: mid-market ₹58.00, their rate ₹57.42 → 1%. A promo rate above mid-market is a negative margin.
+- **Link** and **Affiliate?** — affiliate links get `rel="sponsored"`, and the page shows a disclosure line.
+- **Figures last checked** — shown to readers. Until you set it, the page says the costs are estimates.
+
+The defaults that ship with the plugin are rough estimates, not checked figures. Replace them before launch. Rows are always sorted by what the recipient gets, never by the order you enter them.
+
+Other code can use the plugin's cached rate: `GET /wp-json/oz-tools/v1/rate` → `{ "rate": 57.83, "date": "2026-09-25", "history": [["2026-08-17", 57.78], …], "stale": false }`
 
 ## Keeping figures current — do this every 1 July
 
@@ -41,6 +47,7 @@ All the numbers that change over time are in **`includes/config.php`**:
 - Australian tax brackets and Medicare levy (currently FY2026–27)
 - Indian TDS on NRO interest and the India–Australia treaty rate
 - Bond and rent-in-advance defaults by state, with links to each tenancy authority
+- Starting provider list for the remittance comparator (only used until you save the providers table in admin)
 - Default setup and furniture costs, and savings calculator starting values
 
 After checking them, update `'reviewed'`. That date appears on every tool, so readers can see how current the figures are.
@@ -78,8 +85,8 @@ If GA4 (`gtag`) or Google Tag Manager (`dataLayer`) is on the site, these events
 node --test ozmoneytalks-tools/tests/calc.test.js
 ```
 
-The tests cover the rent, affordability, savings/tax, break-even and rate-history maths, with expected values worked by hand in the test comments.
+The tests cover the remittance, rent, affordability, savings/tax, break-even and rate-history maths, with expected values worked by hand in the test comments.
 
 ## Uninstalling
 
-Deleting the plugin (not just deactivating it) removes its settings and **the subscriber table**. Export the CSV first.
+Deleting the plugin (not just deactivating it) removes its settings, provider table and **the subscriber table**. Export the CSV first.

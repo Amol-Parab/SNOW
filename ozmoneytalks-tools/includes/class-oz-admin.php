@@ -29,6 +29,35 @@ class Oz_Tools_Admin {
 			'type'              => 'array',
 			'sanitize_callback' => array( __CLASS__, 'sanitize' ),
 		) );
+		register_setting( 'oz_tools_providers_group', 'oz_tools_providers', array(
+			'type'              => 'array',
+			'sanitize_callback' => array( __CLASS__, 'sanitize_providers' ),
+		) );
+	}
+
+	public static function sanitize_providers( $in ) {
+		$in    = (array) $in;
+		$items = array();
+		foreach ( isset( $in['items'] ) ? (array) $in['items'] : array() as $row ) {
+			$name = sanitize_text_field( isset( $row['name'] ) ? $row['name'] : '' );
+			if ( '' === $name ) {
+				continue; // Blank rows are how you delete a provider.
+			}
+			$items[] = array(
+				'name'       => $name,
+				'fee_fixed'  => max( 0, min( 500, (float) ( isset( $row['fee_fixed'] ) ? $row['fee_fixed'] : 0 ) ) ),
+				'fee_pct'    => max( 0, min( 20, (float) ( isset( $row['fee_pct'] ) ? $row['fee_pct'] : 0 ) ) ),
+				'margin_pct' => max( -5, min( 20, (float) ( isset( $row['margin_pct'] ) ? $row['margin_pct'] : 0 ) ) ),
+				'url'        => esc_url_raw( isset( $row['url'] ) ? trim( $row['url'] ) : '', array( 'http', 'https' ) ),
+				'affiliate'  => empty( $row['affiliate'] ) ? 0 : 1,
+				'note'       => mb_substr( sanitize_text_field( isset( $row['note'] ) ? $row['note'] : '' ), 0, 140 ),
+			);
+		}
+		$checked = isset( $in['checked'] ) ? sanitize_text_field( $in['checked'] ) : '';
+		return array(
+			'checked' => preg_match( '/^\d{4}-\d{2}-\d{2}$/', $checked ) ? $checked : '',
+			'items'   => $items,
+		);
 	}
 
 	public static function sanitize( $in ) {
@@ -73,7 +102,7 @@ class Oz_Tools_Admin {
 			'rent'       => array( 'Rent move-in calculator', '[oz_rent_calculator]' ),
 			'savings'    => array( 'India vs Australia savings', '[oz_savings_compare]' ),
 			'rate_alert' => array( 'Rate alert', '[oz_rate_alert]' ),
-			'remittance' => array( 'Remittance comparator (#2)', 'your existing tool' ),
+			'remittance' => array( 'Send money to India', '[oz_remittance]' ),
 			'privacy'    => array( 'Privacy policy', '' ),
 		);
 		?>
@@ -141,6 +170,42 @@ class Oz_Tools_Admin {
 					</tr>
 				</table>
 				<?php submit_button(); ?>
+			</form>
+
+			<h2 id="providers">Money transfer providers</h2>
+			<?php $prov = oz_tools_providers(); ?>
+			<p class="description" style="max-width:760px">Used by <code>[oz_remittance]</code>. For each provider, get a live quote for sending A$1,000 to India and work out: <strong>fee</strong> (fixed A$ and/or % of the amount) and <strong>FX margin</strong> = how far their rate is below the mid-market rate, as a %. Example: mid-market ₹58.00, their rate ₹57.42 → margin 1%. Clear a name to remove a row. Rows are sorted on the page by what the recipient gets, not by this order.</p>
+			<?php if ( ! $prov['checked'] ) : ?>
+				<div class="notice notice-warning inline"><p>These are starting estimates, not checked figures. The page tells readers they are estimates until you enter a "last checked" date.</p></div>
+			<?php endif; ?>
+			<form method="post" action="options.php">
+				<?php settings_fields( 'oz_tools_providers_group' ); ?>
+				<table class="widefat striped" style="max-width:1100px">
+					<thead><tr><th>Name</th><th>Fixed fee (A$)</th><th>Fee %</th><th>FX margin %</th><th>Link</th><th>Affiliate?</th><th>Note shown to readers</th></tr></thead>
+					<tbody>
+						<?php
+						$rows = array_values( $prov['items'] );
+						$rows = array_pad( $rows, max( 8, count( $rows ) + 2 ), array( 'name' => '', 'fee_fixed' => '', 'fee_pct' => '', 'margin_pct' => '', 'url' => '', 'affiliate' => 0, 'note' => '' ) );
+						foreach ( $rows as $i => $r ) :
+							$n = 'oz_tools_providers[items][' . (int) $i . ']';
+							?>
+							<tr>
+								<td><input type="text" name="<?php echo esc_attr( $n ); ?>[name]" value="<?php echo esc_attr( $r['name'] ); ?>" style="width:100%"></td>
+								<td><input type="number" step="0.01" min="0" name="<?php echo esc_attr( $n ); ?>[fee_fixed]" value="<?php echo esc_attr( $r['fee_fixed'] ); ?>" style="width:6em"></td>
+								<td><input type="number" step="0.01" min="0" name="<?php echo esc_attr( $n ); ?>[fee_pct]" value="<?php echo esc_attr( $r['fee_pct'] ); ?>" style="width:6em"></td>
+								<td><input type="number" step="0.01" min="-5" name="<?php echo esc_attr( $n ); ?>[margin_pct]" value="<?php echo esc_attr( $r['margin_pct'] ); ?>" style="width:6em"></td>
+								<td><input type="url" name="<?php echo esc_attr( $n ); ?>[url]" value="<?php echo esc_attr( $r['url'] ); ?>" style="width:100%"></td>
+								<td style="text-align:center"><input type="checkbox" name="<?php echo esc_attr( $n ); ?>[affiliate]" value="1" <?php checked( ! empty( $r['affiliate'] ) ); ?>></td>
+								<td><input type="text" name="<?php echo esc_attr( $n ); ?>[note]" value="<?php echo esc_attr( $r['note'] ); ?>" maxlength="140" style="width:100%"></td>
+							</tr>
+						<?php endforeach; ?>
+					</tbody>
+				</table>
+				<p>
+					<label>Figures last checked <input type="date" name="oz_tools_providers[checked]" value="<?php echo esc_attr( $prov['checked'] ); ?>"></label>
+					<span class="description">Shown to readers. Re-check at least monthly.</span>
+				</p>
+				<?php submit_button( 'Save providers' ); ?>
 			</form>
 
 			<h2>Latest signups</h2>

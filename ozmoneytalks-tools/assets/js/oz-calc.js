@@ -153,6 +153,55 @@
 		return (lo + hi) / 2;
 	}
 
+	/* ---------------- Remittance: AUD → INR ---------------- */
+
+	/**
+	 * What the recipient gets from each provider, best first.
+	 * Fees come off the AUD sent; the provider's rate is the mid-market rate less its margin.
+	 *
+	 * @param {number} amount AUD sent
+	 * @param {number} mid    mid-market INR per AUD
+	 * @param {Array}  providers [{ name, fee_fixed, fee_pct, margin_pct, ... }]
+	 * @return {Array} providers with inr, rate, fees, costAud, costPct, behindBest (INR)
+	 */
+	function remittanceCompare(amount, mid, providers) {
+		amount = Math.max(0, num(amount));
+		mid = Math.max(0, num(mid));
+		var rows = (providers || []).map(function (p) {
+			var fees = Math.min(amount, Math.max(0, num(p.fee_fixed)) + amount * Math.max(0, num(p.fee_pct)) / 100);
+			// A negative margin is allowed: promo rates can beat mid-market.
+			var rate = mid * (1 - num(p.margin_pct) / 100);
+			var inr = (amount - fees) * rate;
+			var costAud = mid > 0 ? amount - inr / mid : 0;
+			return Object.assign({}, p, {
+				fees: fees,
+				rate: rate,
+				inr: inr,
+				costAud: costAud,
+				costPct: amount > 0 ? costAud / amount : 0
+			});
+		});
+		rows.sort(function (a, b) { return b.inr - a.inr; });
+		var best = rows.length ? rows[0].inr : 0;
+		rows.forEach(function (r) { r.behindBest = best - r.inr; });
+		return rows;
+	}
+
+	/**
+	 * Turn a provider's quoted rate and fee into the same shape, so a reader's own quote
+	 * can be ranked alongside the others.
+	 */
+	function quoteAsProvider(name, quotedRate, feeAud, mid) {
+		var m = num(mid), q = num(quotedRate);
+		return {
+			name: name,
+			fee_fixed: Math.max(0, num(feeAud)),
+			fee_pct: 0,
+			margin_pct: m > 0 && q > 0 ? (1 - q / m) * 100 : 0,
+			custom: true
+		};
+	}
+
 	/* ---------------- Rate history ---------------- */
 
 	/**
@@ -177,6 +226,8 @@
 		affordability: affordability,
 		savingsCompare: savingsCompare,
 		breakEvenChange: breakEvenChange,
+		remittanceCompare: remittanceCompare,
+		quoteAsProvider: quoteAsProvider,
 		rateStats: rateStats
 	};
 });

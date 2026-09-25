@@ -77,6 +77,20 @@ return array(
 		'stress'      => 0.30,
 	),
 
+	// Remittance comparator (#2). These provider costs are only the starting values: once
+	// you save the providers table in Settings → OzMoneyTalks Tools, that table is used instead.
+	// They are rough estimates — check each provider's live AUD→INR quote before launch.
+	'remittance'   => array(
+		'amount'    => 1000,
+		'providers' => array(
+			array( 'name' => 'Wise', 'fee_fixed' => 0, 'fee_pct' => 0.65, 'margin_pct' => 0, 'url' => 'https://wise.com/au/', 'affiliate' => 0, 'note' => 'Mid-market rate; fee shown upfront.' ),
+			array( 'name' => 'Remitly', 'fee_fixed' => 0, 'fee_pct' => 0, 'margin_pct' => 0.9, 'url' => 'https://www.remitly.com/au/en/india', 'affiliate' => 0, 'note' => 'First-transfer promo rates are often better.' ),
+			array( 'name' => 'Xe', 'fee_fixed' => 0, 'fee_pct' => 0, 'margin_pct' => 1.0, 'url' => 'https://www.xe.com/en-au/send-money/', 'affiliate' => 0, 'note' => '' ),
+			array( 'name' => 'Western Union (online)', 'fee_fixed' => 0, 'fee_pct' => 0, 'margin_pct' => 1.8, 'url' => 'https://www.westernunion.com/au/en/home.html', 'affiliate' => 0, 'note' => '' ),
+			array( 'name' => 'Typical Australian bank', 'fee_fixed' => 10, 'fee_pct' => 0, 'margin_pct' => 4.0, 'url' => '', 'affiliate' => 0, 'note' => 'Intermediary banks may take a further fee.' ),
+		),
+	),
+
 	// Currency data for the rate alert (Frankfurter, ECB reference rates).
 	'fx_api'       => 'https://api.frankfurter.dev/v1',
 );

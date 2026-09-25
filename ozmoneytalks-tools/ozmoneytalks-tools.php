@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name:       OzMoneyTalks Tools
- * Description:       Money tools for Indian migrants in Australia: settling-in checklist, rent move-in cost calculator, India vs Australia savings comparator, and AUD→INR rate alerts with a weekly email.
+ * Description:       Money tools for Indian migrants in Australia: send-money-to-India comparator, settling-in checklist, rent move-in cost calculator, India vs Australia savings comparator, and AUD→INR rate alerts with a weekly email.
  * Version:           1.0.0
  * Requires at least: 6.2
  * Requires PHP:      7.4

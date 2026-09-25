@@ -70,6 +70,22 @@ function oz_tools_settings() {
 }
 
 /**
+ * Remittance providers: the admin-edited table if saved, otherwise the config defaults.
+ *
+ * @return array { checked: 'Y-m-d' or '', items: [ {name, fee_fixed, fee_pct, margin_pct, url, affiliate, note} ] }
+ */
+function oz_tools_providers() {
+	$saved = get_option( 'oz_tools_providers' );
+	if ( is_array( $saved ) && ! empty( $saved['items'] ) ) {
+		return $saved;
+	}
+	return array(
+		'checked' => '',
+		'items'   => oz_tools_config()['remittance']['providers'],
+	);
+}
+
+/**
  * Public URLs of each tool page, used for cross-links between tools and in emails.
  */
 function oz_tools_urls() {

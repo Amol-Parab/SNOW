@@ -374,6 +374,85 @@
 		});
 	}
 
+	/* ---------------- #2 remittance comparator ---------------- */
+
+	var inrWhole = new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 });
+	function inr0(n) { return '₹' + inrWhole.format(Math.round(n)); }
+
+	function initRemittance(root) {
+		var f = function (n) { return root.querySelector('[name="' + n + '"]'); };
+		var midTouched = false;
+
+		function update() {
+			var amount = val(f('amount'));
+			var mid = val(f('mid')) || C.savings.fallback_aud_inr;
+			var list = (C.providers || []).slice();
+			var qRate = val(f('quote_rate'));
+			if (qRate > 0) list.push(Calc.quoteAsProvider('Your quote', qRate, val(f('quote_fee')), mid));
+
+			var rows = Calc.remittanceCompare(amount, mid, list);
+			var maxCost = Math.max.apply(null, rows.map(function (r) { return Math.max(r.costAud, 0); }).concat([0.01]));
+
+			$('[data-oz-rank]', root).innerHTML = rows.map(function (r, i) {
+				var link = r.url
+					? '<a class="oz-rank__go" href="' + esc(r.url) + '" target="_blank" rel="noopener' + (r.affiliate ? ' sponsored' : '') + '">' + 'Visit ' + esc(r.name) + ' →</a>'
+					: '';
+				var behind = i > 0 && r.behindBest >= 1 ? ' · <span class="oz-rank__behind">' + inr0(r.behindBest) + ' less than #1</span>' : '';
+				return '<li class="oz-rank__item' + (i === 0 ? ' is-best' : '') + (r.custom ? ' is-custom' : '') + '">' +
+					'<div class="oz-opt__row"><span class="oz-opt__name">' + esc(r.name) +
+					(i === 0 ? ' <em>Most rupees</em>' : '') + '</span>' +
+					'<strong class="oz-opt__end">' + inr0(r.inr) + '</strong></div>' +
+					'<div class="oz-bd__track oz-bd__track--cost" title="Cost"><span style="width:' + ((Math.max(r.costAud, 0) / maxCost) * 100).toFixed(1) + '%"></span></div>' +
+					'<p class="oz-opt__meta">Costs ' + (r.costAud < 0 ? '−' : '') + '$' + Math.abs(r.costAud).toFixed(2) + ' (' + pct(r.costPct, 2) + ')' +
+					' · rate ' + inr(r.rate) + (r.fees > 0 ? ' · fee $' + r.fees.toFixed(2) : ' · no fee') + behind + '</p>' +
+					(r.note ? '<p class="oz-opt__meta">' + esc(r.note) + '</p>' : '') +
+					(link ? '<p class="oz-opt__meta">' + link + '</p>' : '') +
+					'</li>';
+			}).join('');
+
+			var out = [];
+			if (rows.length > 1 && amount > 0) {
+				var best = rows[0], worst = rows[rows.length - 1];
+				var gap = best.inr - worst.inr;
+				out.push('Choosing <strong>' + esc(best.name) + '</strong> over ' + esc(worst.name) + ' puts <strong>' + inr0(gap) +
+					'</strong> more in your family\'s hands — about ' + aud(gap / mid) + '.');
+				if (f('monthly').checked) {
+					out.push('Sending this every month, that difference adds up to about <strong>' + aud((gap / mid) * 12) + ' a year</strong>.');
+				}
+				var mine = rows.filter(function (r) { return r.custom; })[0];
+				if (mine) {
+					var pos = rows.indexOf(mine) + 1;
+					out.push(pos === 1
+						? 'Your quote is the best of these — go for it (after checking for any receiving-bank fees).'
+						: 'Your quote ranks #' + pos + ' of ' + rows.length + '. It costs $' + mine.costAud.toFixed(2) + ' vs $' + best.costAud.toFixed(2) + ' with ' + esc(best.name) + '.');
+				}
+			}
+			$('[data-oz-remit-insights]', root).innerHTML = out.map(function (t) { return '<li>' + t + '</li>'; }).join('');
+		}
+
+		$$('.oz-chip', root).forEach(function (b) {
+			b.addEventListener('click', function () {
+				f('amount').value = b.getAttribute('data-amount');
+				f('amount').dispatchEvent(new Event('input', { bubbles: true }));
+			});
+		});
+		f('mid').addEventListener('input', function () { midTouched = true; });
+		root.addEventListener('input', update);
+		root.addEventListener('change', update);
+		trackUseOnce($('.oz-form', root), 'remittance');
+		update();
+
+		getRate().then(function (d) {
+			var note = $('[data-oz-mid-note]', root);
+			if (d && d.rate) {
+				if (!midTouched) { f('mid').value = Number(d.rate).toFixed(2); update(); }
+				note.textContent = 'European Central Bank reference rate for ' + fmtDate(d.date) + (d.stale ? ' (latest available)' : '') + '.';
+			} else {
+				note.textContent = 'Couldn\'t fetch today\'s rate — enter it yourself.';
+			}
+		});
+	}
+
 	/* ---------------- #11 rate alert ---------------- */
 
 	function sparkline(fig, history) {
@@ -464,6 +543,7 @@
 		$$('[data-oz-rent]').forEach(initRent);
 		$$('[data-oz-savings]').forEach(initSavings);
 		$$('[data-oz-rate]').forEach(initRateAlert);
+		$$('[data-oz-remit]').forEach(initRemittance);
 		$$('[data-oz-signup]').forEach(initSignup);
 	}
 

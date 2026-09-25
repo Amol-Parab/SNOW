@@ -182,6 +182,20 @@
 .oz-hide-done .oz-item.is-done { display: none; }
 .oz-actions { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; margin-top: 16px; }
 
+/* Remittance comparator. */
+.oz-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.oz-chip { background: #fff; border: 1px solid #cbd0d8; border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 13.5px; cursor: pointer; color: var(--oz-ink); min-height: 34px; }
+.oz-chip:hover { border-color: var(--oz-accent); }
+.oz-rank { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 10px; }
+.oz-rank__item { background: #fff; border: 1px solid var(--oz-line); border-radius: 8px; padding: 12px 14px; margin: 0; }
+.oz-rank__item.is-best { border-color: var(--oz-accent); box-shadow: inset 0 0 0 1px var(--oz-accent); }
+.oz-rank__item.is-custom { border-style: dashed; }
+.oz-rank__item .oz-opt__meta { margin-top: 4px; }
+.oz-rank__behind { color: var(--oz-ink); }
+.oz-rank__go { color: var(--oz-accent); font-weight: 600; }
+.oz-bd__track--cost { height: 6px; }
+.oz-bd__track--cost span { background: color-mix(in srgb, var(--oz-accent) 45%, #cbd5e1); }
+
 /* Rate alert. */
 .oz-spark { position: relative; margin: 8px 0 12px; }
 .oz-spark svg { display: block; width: 100%; height: 90px; overflow: visible; touch-action: pan-y; cursor: crosshair; }

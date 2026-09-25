@@ -87,3 +87,35 @@ test('rate stats', () => {
 	assert.equal(s.monthChange, 6);
 	assert.equal(C.rateStats([]), null);
 });
+
+test('remittance: fees, margins and ranking', () => {
+	const rows = C.remittanceCompare(1000, 58, [
+		{ name: 'C', fee_fixed: 10, margin_pct: 4 },  // 990 × 55.68 = ₹55,123.20; cost A$49.60
+		{ name: 'A', fee_pct: 0.65 },                  // 993.5 × 58 = ₹57,623; cost A$6.50
+		{ name: 'B', margin_pct: 1 }                   // 1000 × 57.42 = ₹57,420; cost A$10
+	]);
+	assert.deepEqual(rows.map(r => r.name), ['A', 'B', 'C']);
+	close(rows[0].inr, 57623);
+	close(rows[0].costAud, 6.5);
+	close(rows[1].costPct, 0.01, 1e-9);
+	close(rows[2].inr, 55123.2);
+	close(rows[2].costAud, 49.6);
+	close(rows[1].behindBest, 203);
+	close(rows[2].behindBest, 2499.8);
+});
+
+test('remittance: fee larger than the amount leaves nothing, never negative', () => {
+	const [r] = C.remittanceCompare(100, 58, [{ name: 'X', fee_fixed: 200 }]);
+	assert.equal(r.inr, 0);
+	close(r.costAud, 100);
+});
+
+test('remittance: a reader quote converts to an equivalent margin', () => {
+	const q = C.quoteAsProvider('My bank', 56.84, 5, 58); // 2% below mid
+	close(q.margin_pct, 2, 1e-9);
+	const [r] = C.remittanceCompare(1000, 58, [q]);
+	close(r.inr, 995 * 56.84);
+	// A promo rate above mid-market gives a negative margin and more rupees.
+	const [promo] = C.remittanceCompare(1000, 58, [C.quoteAsProvider('Promo', 58.5, 0, 58)]);
+	close(promo.inr, 58500);
+});

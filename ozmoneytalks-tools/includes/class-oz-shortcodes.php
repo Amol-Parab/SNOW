@@ -5,6 +5,7 @@
  *   [oz_rent_calculator state="NSW"]
  *   [oz_savings_compare]
  *   [oz_rate_alert]
+ *   [oz_remittance]
  *   [oz_signup source="other" title="..."]   (standalone email signup box)
  */
 
@@ -18,6 +19,7 @@ class Oz_Tools_Shortcodes {
 		add_shortcode( 'oz_rent_calculator', array( __CLASS__, 'rent' ) );
 		add_shortcode( 'oz_savings_compare', array( __CLASS__, 'savings' ) );
 		add_shortcode( 'oz_rate_alert', array( __CLASS__, 'rate_alert' ) );
+		add_shortcode( 'oz_remittance', array( __CLASS__, 'remittance' ) );
 		add_shortcode( 'oz_signup', array( __CLASS__, 'signup' ) );
 	}
 
@@ -29,7 +31,7 @@ class Oz_Tools_Shortcodes {
 		// Load styles in <head> on pages we know use a tool (classic themes would otherwise print them late).
 		if ( is_singular() ) {
 			$content = (string) get_post_field( 'post_content', get_queried_object_id() );
-			foreach ( array( 'oz_settling_checklist', 'oz_rent_calculator', 'oz_savings_compare', 'oz_rate_alert', 'oz_signup' ) as $tag ) {
+			foreach ( array( 'oz_settling_checklist', 'oz_rent_calculator', 'oz_savings_compare', 'oz_rate_alert', 'oz_remittance', 'oz_signup' ) as $tag ) {
 				if ( has_shortcode( $content, $tag ) ) {
 					self::enqueue();
 					break;
@@ -70,6 +72,18 @@ class Oz_Tools_Shortcodes {
 			'setup'    => $c['setup_costs'],
 			'furniture' => $c['furniture'],
 			'afford'   => $c['affordability'],
+			'providers' => array_map( function ( $p ) {
+				// Only what the page needs; notes and links are shown as text/URLs.
+				return array(
+					'name'       => $p['name'],
+					'fee_fixed'  => (float) $p['fee_fixed'],
+					'fee_pct'    => (float) $p['fee_pct'],
+					'margin_pct' => (float) $p['margin_pct'],
+					'url'        => $p['url'],
+					'affiliate'  => ! empty( $p['affiliate'] ),
+					'note'       => $p['note'],
+				);
+			}, oz_tools_providers()['items'] ),
 			'urls'     => oz_tools_urls(),
 		) ) . ';', 'before' );
 	}
@@ -102,6 +116,14 @@ class Oz_Tools_Shortcodes {
 
 	public static function rate_alert() {
 		return self::render( 'rate-alert', array( 'urls' => oz_tools_urls() ) );
+	}
+
+	public static function remittance() {
+		return self::render( 'remittance', array(
+			'config'    => oz_tools_config(),
+			'providers' => oz_tools_providers(),
+			'urls'      => oz_tools_urls(),
+		) );
 	}
 
 	public static function signup( $atts ) {
