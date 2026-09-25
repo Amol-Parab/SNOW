@@ -61,12 +61,32 @@ function oz_tools_settings() {
 		'url_rate_alert' => '',
 		'url_remittance' => '',
 		'url_privacy'   => get_privacy_policy_url(),
+		'chat_enabled'  => 0,
+		'chat_log'      => 1,
 	);
 	$s = wp_parse_args( (array) get_option( 'oz_tools_settings', array() ), $defaults );
 	if ( '' === trim( (string) $s['site_name'] ) ) {
 		$s['site_name'] = $defaults['site_name'];
 	}
 	return $s;
+}
+
+/**
+ * Per-IP limit on public requests: true if this visitor has made fewer than $limit
+ * requests to $bucket in the last hour, and counts this one.
+ *
+ * Behind a proxy or CDN (e.g. Cloudflare), REMOTE_ADDR may be the proxy for everyone, so
+ * all visitors share one limit. Use the 'oz_tools_client_ip' filter to supply the real IP.
+ */
+function oz_tools_allow_request( $bucket, $limit ) {
+	$ip  = apply_filters( 'oz_tools_client_ip', isset( $_SERVER['REMOTE_ADDR'] ) ? $_SERVER['REMOTE_ADDR'] : '' );
+	$key = 'oz_tools_' . $bucket . '_' . md5( $ip );
+	$n   = (int) get_transient( $key );
+	if ( $n >= $limit ) {
+		return false;
+	}
+	set_transient( $key, $n + 1, HOUR_IN_SECONDS );
+	return true;
 }
 
 /**

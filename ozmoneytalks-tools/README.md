@@ -13,6 +13,8 @@ Five tools for Indian migrants in Australia, each added to a page with a shortco
 Every tool ends with an email signup, and all signups go into one list. You can also place a signup box anywhere with
 `[oz_signup source="other" title="…" text="…"]`.
 
+There is also an **Ask helper**: a floating "Ask a question" box on every page that points readers to the right tool or post (see below).
+
 ## Install
 
 1. Zip the `ozmoneytalks-tools` folder (`zip -r ozmoneytalks-tools.zip ozmoneytalks-tools -x '*/tests/*'`).
@@ -25,6 +27,32 @@ Every tool ends with an email signup, and all signups go into one list. You can 
 5. **Email delivery:** install an SMTP plugin (e.g. WP Mail SMTP) with a transactional sender (Brevo, Mailgun, Amazon SES). Without it, confirmation emails will often land in spam. Use **Send me a test weekly email** on the settings page to check.
 6. **Scheduled jobs:** WP-Cron only runs when someone visits the site. For reliable 8am alerts, ask your host to add a real cron job that calls `https://yoursite/wp-cron.php` every 15 minutes.
 7. Your host must allow outgoing HTTPS requests to `api.frankfurter.dev`. The settings page shows whether the rate is loading.
+
+## Ask helper
+
+Turn it on under **Settings → OzMoneyTalks Tools → Ask helper**, after the tool page URLs are set. It is off by default.
+
+**What it does.** For each question it shows, in this order:
+1. **Your own answer**, if the question contains one of its keywords. You write these under **Ask helper: your answers**.
+2. **Today's AUD→INR rate**, if the reader asks for it (for example "today's rate" or "AUD to INR").
+3. **Up to two tools** that fit the question.
+4. **Up to three posts or pages** that match the question's words.
+
+If it finds nothing, it says so and lists all the tools.
+
+**What it isn't.** It isn't an AI chatbot. It calls no outside service, needs no API key and costs nothing to run. It never writes financial content of its own, so it can't invent a wrong tax figure. The trade-off is that it only finds what's already on your site. It can't reason through a reader's situation.
+
+**Personal advice.** When a question asks what the reader should do ("should I…", "which is better…", "recommend…"), the helper still shows the tools, but first says it can't give personal financial advice and points to a licensed adviser or registered tax agent. Every reply carries the "General information only" line.
+
+**Improving it.** The **Ask helper: recent questions** table keeps the last 300 questions and what was found for each. Questions that found **nothing** are shown in red. Those are your best leads for new answers and new posts. The log keeps no names or IP addresses, and it strips emails and long numbers (phone, TFN, account). The helper tells readers that questions are saved. Add a line about this to your privacy policy, or turn the log off.
+
+**Changing what it matches.** Tool keywords, the phrases that count as asking for advice, the starter buttons and the greeting are all in **`includes/chat-data.php`**. You can also override them with the `oz_tools_chat_data` filter.
+
+Other hooks:
+- `oz_tools_chat_show` (bool): return false to hide the helper on some pages.
+- `oz_tools_chat_post_types` (array): which post types it searches (default `post`, `page`).
+- `oz_tools_chat_hourly_limit` (int): questions per visitor per hour (default 30). This uses the same `oz_tools_client_ip` filter as signups.
+- `oz_tools_chat_reply` (`$reply`, `$message`): change the reply before it's sent. This is the place to connect an AI model later. It receives the answer, the tools and the matching posts, so a model can write a summary grounded in your own content. If you do this, keep the advice notice and disclaimer. Also check the provider's data terms: some free tiers use the questions for training.
 
 ## Remittance providers — check at least monthly
 
@@ -78,15 +106,19 @@ If GA4 (`gtag`) or Google Tag Manager (`dataLayer`) is on the site, these events
 | `oz_checklist_persona` | persona switched | `persona` |
 | `oz_checklist_tick` | item ticked | `item`, `persona` |
 | `oz_signup` | successful signup | `tool`, `consent`, `alert` |
+| `oz_chat_open` | Ask helper opened | |
+| `oz_chat_ask` | question answered | `answered` (false if nothing was found) |
+| `oz_chat_click` | link in a reply clicked | `url` |
 
 ## Tests
 
 ```
 node --test ozmoneytalks-tools/tests/calc.test.js
+php ozmoneytalks-tools/tests/chat.test.php
 ```
 
-The tests cover the remittance, rent, affordability, savings/tax, break-even and rate-history maths, with expected values worked by hand in the test comments.
+The first covers the remittance, rent, affordability, savings/tax, break-even and rate-history maths, with expected values worked by hand in the test comments. The second covers the Ask helper's matching (tools, rate and advice detection, your answers, search words and scrubbing before logging) against the real keyword lists in `includes/chat-data.php`.
 
 ## Uninstalling
 
-Deleting the plugin (not just deactivating it) removes its settings, provider table and **the subscriber table**. Export the CSV first.
+Deleting the plugin (not just deactivating it) removes its settings, provider table, Ask helper answers and question log, and **the subscriber table**. Export the CSV first.

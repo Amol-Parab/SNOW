@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings → OzMoneyTalks Tools: page links, brand colour, weekly email, subscriber list and CSV export.
+ * Settings → OzMoneyTalks Tools: page links, brand colour, weekly email, Ask helper, subscriber list and CSV export.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -14,6 +14,7 @@ class Oz_Tools_Admin {
 		add_action( 'admin_init', array( __CLASS__, 'register_settings' ) );
 		add_action( 'admin_post_oz_tools_export', array( __CLASS__, 'export_csv' ) );
 		add_action( 'admin_post_oz_tools_test_digest', array( __CLASS__, 'test_digest' ) );
+		add_action( 'admin_post_oz_tools_clear_chat_log', array( __CLASS__, 'clear_chat_log' ) );
 		add_filter( 'plugin_action_links_' . plugin_basename( OZ_TOOLS_FILE ), function ( $links ) {
 			array_unshift( $links, '<a href="' . esc_url( admin_url( 'options-general.php?page=' . self::SLUG ) ) . '">Settings</a>' );
 			return $links;
@@ -33,6 +34,28 @@ class Oz_Tools_Admin {
 			'type'              => 'array',
 			'sanitize_callback' => array( __CLASS__, 'sanitize_providers' ),
 		) );
+		register_setting( 'oz_tools_chat_group', Oz_Tools_Chat::ANSWERS_OPTION, array(
+			'type'              => 'array',
+			'sanitize_callback' => array( __CLASS__, 'sanitize_chat_answers' ),
+		) );
+	}
+
+	public static function sanitize_chat_answers( $in ) {
+		$in    = (array) $in;
+		$items = array();
+		foreach ( isset( $in['items'] ) ? (array) $in['items'] : array() as $row ) {
+			$keywords = sanitize_text_field( isset( $row['keywords'] ) ? $row['keywords'] : '' );
+			$answer   = sanitize_textarea_field( isset( $row['answer'] ) ? $row['answer'] : '' );
+			if ( '' === trim( $keywords ) || '' === trim( $answer ) ) {
+				continue; // Blank rows are how you delete an answer.
+			}
+			$items[] = array(
+				'keywords' => mb_substr( $keywords, 0, 200 ),
+				'answer'   => mb_substr( $answer, 0, 600 ),
+				'link'     => esc_url_raw( isset( $row['link'] ) ? trim( $row['link'] ) : '', array( 'http', 'https' ) ),
+			);
+		}
+		return array( 'items' => $items );
 	}
 
 	public static function sanitize_providers( $in ) {
@@ -67,6 +90,8 @@ class Oz_Tools_Admin {
 			'site_name'     => sanitize_text_field( isset( $in['site_name'] ) ? $in['site_name'] : '' ),
 			'weekly_digest' => empty( $in['weekly_digest'] ) ? 0 : 1,
 			'digest_day'    => min( 7, max( 1, (int) ( isset( $in['digest_day'] ) ? $in['digest_day'] : 1 ) ) ),
+			'chat_enabled'  => empty( $in['chat_enabled'] ) ? 0 : 1,
+			'chat_log'      => empty( $in['chat_log'] ) ? 0 : 1,
 		);
 		foreach ( array( 'checklist', 'rent', 'savings', 'rate_alert', 'remittance', 'privacy' ) as $k ) {
 			$out[ 'url_' . $k ] = esc_url_raw( isset( $in[ 'url_' . $k ] ) ? trim( $in[ 'url_' . $k ] ) : '' );
@@ -108,6 +133,10 @@ class Oz_Tools_Admin {
 		?>
 		<div class="wrap">
 			<h1>OzMoneyTalks Tools</h1>
+
+			<?php if ( isset( $_GET['oz_chat_cleared'] ) ) : // phpcs:ignore ?>
+				<div class="notice notice-success"><p>Question log cleared.</p></div>
+			<?php endif; ?>
 
 			<?php if ( isset( $_GET['oz_test'] ) ) : // phpcs:ignore ?>
 				<div class="notice notice-success"><p>Test weekly email sent to <?php echo esc_html( wp_get_current_user()->user_email ); ?>. If it didn't arrive, set up an SMTP plugin (see below).</p></div>
@@ -169,6 +198,21 @@ class Oz_Tools_Admin {
 						</td>
 					</tr>
 				</table>
+
+				<h2>Ask helper</h2>
+				<p class="description" style="max-width:720px">A floating "Ask a question" box on every page. It answers from this site only: your answers below, today's exchange rate, the tool pages above and your posts. It uses no AI service and costs nothing to run. When someone asks what they personally should do, it says it can't give personal advice.</p>
+				<table class="form-table" role="presentation">
+					<tr>
+						<th scope="row">Show the helper</th>
+						<td><label><input type="checkbox" name="oz_tools_settings[chat_enabled]" value="1" <?php checked( $s['chat_enabled'] ); ?>> Show "Ask a question" on every page</label>
+							<p class="description">Set the tool page URLs above first. The helper only suggests tools whose page is set.</p></td>
+					</tr>
+					<tr>
+						<th scope="row">Question log</th>
+						<td><label><input type="checkbox" name="oz_tools_settings[chat_log]" value="1" <?php checked( $s['chat_log'] ); ?>> Keep the last <?php echo (int) Oz_Tools_Chat::LOG_MAX; ?> questions so I can see what readers ask</label>
+							<p class="description">No names or IP addresses are kept, and emails and long numbers are removed. The helper tells readers questions are saved. Mention it in your privacy policy.</p></td>
+					</tr>
+				</table>
 				<?php submit_button(); ?>
 			</form>
 
@@ -207,6 +251,51 @@ class Oz_Tools_Admin {
 				</p>
 				<?php submit_button( 'Save providers' ); ?>
 			</form>
+
+			<h2 id="chat-answers">Ask helper: your answers</h2>
+			<?php $answers = Oz_Tools_Chat::answers(); ?>
+			<p class="description" style="max-width:760px">Write short answers to questions readers ask often (check <strong>Recent questions</strong> below for ones the helper couldn't answer). When a question contains any of an answer's keywords, the helper shows that answer first, then the matching tools and posts. Use commas between keywords, e.g. <code>tfn, tax file number</code>. Keep answers general: facts and where to find things, not what a reader should do. Clear the keywords to remove a row.</p>
+			<form method="post" action="options.php">
+				<?php settings_fields( 'oz_tools_chat_group' ); ?>
+				<table class="widefat striped" style="max-width:1100px">
+					<thead><tr><th style="width:24%">Keywords</th><th>Answer (up to 600 characters)</th><th style="width:24%">"Read more" link (optional)</th></tr></thead>
+					<tbody>
+						<?php
+						$rows = array_pad( $answers, count( $answers ) + 3, array( 'keywords' => '', 'answer' => '', 'link' => '' ) );
+						foreach ( $rows as $i => $r ) :
+							$n = Oz_Tools_Chat::ANSWERS_OPTION . '[items][' . (int) $i . ']';
+							?>
+							<tr>
+								<td><input type="text" name="<?php echo esc_attr( $n ); ?>[keywords]" value="<?php echo esc_attr( $r['keywords'] ); ?>" style="width:100%"></td>
+								<td><textarea name="<?php echo esc_attr( $n ); ?>[answer]" rows="3" maxlength="600" style="width:100%"><?php echo esc_textarea( $r['answer'] ); ?></textarea></td>
+								<td><input type="url" name="<?php echo esc_attr( $n ); ?>[link]" value="<?php echo esc_attr( $r['link'] ); ?>" style="width:100%" placeholder="https://"></td>
+							</tr>
+						<?php endforeach; ?>
+					</tbody>
+				</table>
+				<?php submit_button( 'Save answers' ); ?>
+			</form>
+
+			<h2>Ask helper: recent questions</h2>
+			<?php $asked = Oz_Tools_Chat::recent( 50 ); ?>
+			<table class="widefat striped" style="max-width:1100px">
+				<thead><tr><th style="width:16%">When</th><th>Question</th><th style="width:22%">Found</th></tr></thead>
+				<tbody>
+					<?php if ( ! $asked ) : ?>
+						<tr><td colspan="3"><?php echo $s['chat_log'] ? 'No questions yet.' : 'The question log is off.'; ?></td></tr>
+					<?php endif; ?>
+					<?php foreach ( $asked as $q ) : ?>
+						<tr>
+							<td><?php echo esc_html( wp_date( 'j M, g:ia', (int) $q['t'] ) ); ?></td>
+							<td><?php echo esc_html( $q['q'] ); ?></td>
+							<td><?php echo $q['a'] ? esc_html( $q['f'] ) : '<strong style="color:#b32d2e">' . esc_html( $q['f'] ) . '</strong>'; ?></td>
+						</tr>
+					<?php endforeach; ?>
+				</tbody>
+			</table>
+			<?php if ( $asked ) : ?>
+				<p><a class="button" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=oz_tools_clear_chat_log' ), 'oz_tools_clear_chat_log' ) ); ?>" onclick="return confirm('Delete all saved questions?');">Clear question log</a></p>
+			<?php endif; ?>
 
 			<h2>Latest signups</h2>
 			<table class="widefat striped">
@@ -254,6 +343,15 @@ class Oz_Tools_Admin {
 			fputcsv( $out, $r, ',', '"', '' );
 		}
 		fclose( $out );
+		exit;
+	}
+
+	public static function clear_chat_log() {
+		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'oz_tools_clear_chat_log' ) ) {
+			wp_die( 'Not allowed.' );
+		}
+		delete_option( Oz_Tools_Chat::LOG_OPTION );
+		wp_safe_redirect( admin_url( 'options-general.php?page=' . self::SLUG . '&oz_chat_cleared=1' ) );
 		exit;
 	}
 

@@ -209,19 +209,10 @@ class Oz_Tools_Subscribers {
 	}
 
 	/**
-	 * Simple per-IP limit: 10 requests per hour.
-	 * Behind Cloudflare or another proxy, REMOTE_ADDR may be the proxy's address, which makes
-	 * all visitors share one limit. Use the 'oz_tools_client_ip' filter to supply the real IP.
+	 * Per-IP limit on signups: 10 requests per hour (see oz_tools_allow_request()).
 	 */
 	private static function allow_request() {
-		$ip  = apply_filters( 'oz_tools_client_ip', isset( $_SERVER['REMOTE_ADDR'] ) ? $_SERVER['REMOTE_ADDR'] : '' );
-		$key = 'oz_tools_rl_' . md5( $ip );
-		$n   = (int) get_transient( $key );
-		if ( $n >= (int) apply_filters( 'oz_tools_hourly_limit', 10 ) ) {
-			return false;
-		}
-		set_transient( $key, $n + 1, HOUR_IN_SECONDS );
-		return true;
+		return oz_tools_allow_request( 'rl', (int) apply_filters( 'oz_tools_hourly_limit', 10 ) );
 	}
 
 	private static function send_confirmation( $email, $token, $prefs ) {

@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name:       OzMoneyTalks Tools
- * Description:       Money tools for Indian migrants in Australia: send-money-to-India comparator, settling-in checklist, rent move-in cost calculator, India vs Australia savings comparator, and AUD→INR rate alerts with a weekly email.
- * Version:           1.0.1
+ * Description:       Money tools for Indian migrants in Australia: send-money-to-India comparator, settling-in checklist, rent move-in cost calculator, India vs Australia savings comparator, and AUD→INR rate alerts with a weekly email, plus an "Ask" helper that points readers to the right tool or guide.
+ * Version:           1.1.0
  * Requires at least: 6.2
  * Requires PHP:      7.4
  * Author:            OzMoneyTalks
@@ -12,7 +12,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'OZ_TOOLS_VERSION', '1.0.1' );
+define( 'OZ_TOOLS_VERSION', '1.1.0' );
 define( 'OZ_TOOLS_FILE', __FILE__ );
 define( 'OZ_TOOLS_DIR', plugin_dir_path( __FILE__ ) );
 define( 'OZ_TOOLS_URL', plugin_dir_url( __FILE__ ) );
@@ -22,6 +22,8 @@ require_once OZ_TOOLS_DIR . 'includes/class-oz-rates.php';
 require_once OZ_TOOLS_DIR . 'includes/class-oz-subscribers.php';
 require_once OZ_TOOLS_DIR . 'includes/class-oz-alerts.php';
 require_once OZ_TOOLS_DIR . 'includes/class-oz-shortcodes.php';
+require_once OZ_TOOLS_DIR . 'includes/class-oz-chat-match.php';
+require_once OZ_TOOLS_DIR . 'includes/class-oz-chat.php';
 require_once OZ_TOOLS_DIR . 'includes/class-oz-admin.php';
 
 register_activation_hook( __FILE__, array( 'Oz_Tools_Subscribers', 'install' ) );
@@ -34,6 +36,7 @@ add_action( 'plugins_loaded', function () {
 	Oz_Tools_Subscribers::init();
 	Oz_Tools_Alerts::init();
 	Oz_Tools_Shortcodes::init();
+	Oz_Tools_Chat::init();
 	if ( is_admin() ) {
 		Oz_Tools_Admin::init();
 	}
