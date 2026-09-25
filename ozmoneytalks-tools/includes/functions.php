@@ -48,6 +48,8 @@ function oz_tools_checklist_for( $persona ) {
 
 /**
  * Admin settings, merged with defaults.
+ * Call from 'init' or later: the privacy page default needs WordPress's rewrite rules,
+ * which don't exist yet on 'plugins_loaded' (calling it there is a fatal error).
  */
 function oz_tools_settings() {
 	$defaults = array(

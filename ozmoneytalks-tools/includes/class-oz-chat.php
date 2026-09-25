@@ -24,10 +24,10 @@ class Oz_Tools_Chat {
 
 	public static function init() {
 		add_action( 'rest_api_init', array( __CLASS__, 'register_routes' ) );
-		if ( oz_tools_settings()['chat_enabled'] && ! is_admin() ) {
-			add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue' ) );
-			add_action( 'wp_footer', array( __CLASS__, 'render' ) );
-		}
+		// Don't read the settings here: this runs on plugins_loaded, before WordPress can build
+		// page links, and the settings' defaults include the privacy page's link. show() checks later.
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue' ) );
+		add_action( 'wp_footer', array( __CLASS__, 'render' ) );
 	}
 
 	/**
@@ -50,7 +50,7 @@ class Oz_Tools_Chat {
 	}
 
 	private static function show() {
-		return (bool) apply_filters( 'oz_tools_chat_show', true );
+		return oz_tools_settings()['chat_enabled'] && (bool) apply_filters( 'oz_tools_chat_show', true );
 	}
 
 	public static function enqueue() {
