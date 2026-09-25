@@ -19,7 +19,7 @@ foreach ( $tx['brackets'] as $b ) {
 	$lower   = $upper;
 }
 ?>
-<div class="oz-tool oz-savings" data-oz-savings>
+<div class="oz-tool oz-savings"<?php echo oz_tools_root_style(); // phpcs:ignore ?> data-oz-savings>
 	<div class="oz-card">
 		<div class="oz-head">
 			<h2 class="oz-title">India or Australia: where should your savings sit?</h2>

@@ -7,7 +7,7 @@ defined( 'ABSPATH' ) || exit;
 $id        = wp_unique_id( 'oz-rem-' );
 $affiliate = (bool) array_filter( wp_list_pluck( $providers['items'], 'affiliate' ) );
 ?>
-<div class="oz-tool oz-remit" data-oz-remit>
+<div class="oz-tool oz-remit"<?php echo oz_tools_root_style(); // phpcs:ignore ?> data-oz-remit>
 	<div class="oz-card">
 		<div class="oz-head">
 			<h2 class="oz-title">Send money to India: who gives you the most rupees?</h2>

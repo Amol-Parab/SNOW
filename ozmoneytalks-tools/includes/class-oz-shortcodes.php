@@ -53,13 +53,8 @@ class Oz_Tools_Shortcodes {
 			self::register_assets();
 		}
 		$c = oz_tools_config();
-		$s = oz_tools_settings();
 
-		wp_enqueue_style( 'oz-tools' );
-		$accent = sanitize_hex_color( $s['accent'] );
-		if ( $accent ) {
-			wp_add_inline_style( 'oz-tools', '.oz-tool{--oz-accent:' . $accent . '}' );
-		}
+		wp_enqueue_style( 'oz-tools' ); // Brand colour is set per tool by oz_tools_root_style().
 
 		wp_enqueue_script( 'oz-tools' );
 		wp_add_inline_script( 'oz-tools', 'window.OZTools = ' . wp_json_encode( array(
@@ -133,7 +128,7 @@ class Oz_Tools_Shortcodes {
 			'text'   => 'One short email a week: the rupee rate, new guides and tools for Indians in Australia.',
 		), $atts, 'oz_signup' );
 		$source = in_array( $atts['source'], Oz_Tools_Subscribers::SOURCES, true ) ? $atts['source'] : 'other';
-		return '<div class="oz-tool">' . self::signup_box( $source, $atts['title'], $atts['text'] ) . '</div>';
+		return '<div class="oz-tool"' . oz_tools_root_style() . '>' . self::signup_box( $source, $atts['title'], $atts['text'] ) . '</div>';
 	}
 
 	/**

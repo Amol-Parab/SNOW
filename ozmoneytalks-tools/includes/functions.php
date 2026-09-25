@@ -137,6 +137,15 @@ function oz_tools_mail_button( $url, $label ) {
 }
 
 /**
+ * style="" attribute for each tool's root element, carrying the brand colour.
+ * An attribute survives CSS optimisers (LiteSpeed, WP Rocket) that strip or delay inline <style> blocks.
+ */
+function oz_tools_root_style() {
+	$accent = sanitize_hex_color( oz_tools_settings()['accent'] );
+	return $accent ? ' style="--oz-accent:' . esc_attr( $accent ) . '"' : '';
+}
+
+/**
  * Format an AUD→INR rate for display.
  */
 function oz_tools_fmt_rate( $rate ) {

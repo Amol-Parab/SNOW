@@ -7,7 +7,7 @@ defined( 'ABSPATH' ) || exit;
 $id = wp_unique_id( 'oz-rent-' );
 $st = $config['states'][ $state ];
 ?>
-<div class="oz-tool oz-rent" data-oz-rent>
+<div class="oz-tool oz-rent"<?php echo oz_tools_root_style(); // phpcs:ignore ?> data-oz-rent>
 	<div class="oz-card">
 		<div class="oz-head">
 			<h2 class="oz-title">How much cash do you need to move in?</h2>

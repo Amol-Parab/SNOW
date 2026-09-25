@@ -6,7 +6,7 @@ defined( 'ABSPATH' ) || exit;
 
 $id = wp_unique_id( 'oz-ra-' );
 ?>
-<div class="oz-tool oz-rate" data-oz-rate>
+<div class="oz-tool oz-rate"<?php echo oz_tools_root_style(); // phpcs:ignore ?> data-oz-rate>
 	<div class="oz-card">
 		<div class="oz-head">
 			<h2 class="oz-title">AUD→INR rate alert</h2>

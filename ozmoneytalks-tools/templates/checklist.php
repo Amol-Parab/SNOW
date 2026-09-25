@@ -13,7 +13,7 @@ $tool_labels = array(
 );
 $id = wp_unique_id( 'oz-cl-' );
 ?>
-<div class="oz-tool oz-checklist" data-oz-checklist data-active="<?php echo esc_attr( $active ); ?>">
+<div class="oz-tool oz-checklist"<?php echo oz_tools_root_style(); // phpcs:ignore ?> data-oz-checklist data-active="<?php echo esc_attr( $active ); ?>">
 	<div class="oz-card">
 		<div class="oz-head">
 			<h2 class="oz-title">Your settling-in checklist</h2>
